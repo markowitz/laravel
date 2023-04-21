@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Database\Eloquent\Builder;
 
 class EventsController extends BaseController
 {
@@ -101,7 +103,9 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 1');
+        $events = Event::with('workshops')->get();
+
+        return response()->json($events);
     }
 
 
@@ -179,6 +183,10 @@ class EventsController extends BaseController
      */
 
     public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+        $events = Event::with('workshops')->whereHas('workshops', function (Builder $query) {
+                $query->where('start', ">", now());
+        })->get();
+
+        return response()->json($events);
     }
 }
