@@ -36,7 +36,64 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
+        Schema::create('movies', function($table) {
+            $table->increments('id');
+            $table->string('title');
+            $table->longText('description');
+            $table->string('start_date');
+            $table->string('end_date');
+            $table->timestamps();
+        });
+
+        Schema::create('showrooms', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        //Seating table comes with type to know if it's vip and a surcharge_percentage column to
+        //store perctange for the seat
+        Schema::create('seating', function($table) {
+            $table->increments('id');
+            $table->string('position');
+            $table->string('type');
+            $table->string('surcharge_percentage');
+            $table->timestamps();
+        });
+
+        //Tickets table comes with the time slot for each ticket
+        Schema::create('tickets', function($table) {
+            $table->increments('id');
+            $table->string('time');
+            $table->bigInteger('quantity_available');
+            $table->decimal('price', 13, 2);
+            $table->integer('showroom_id')->unsigned();
+            $table->foreign('showroom_id')->references('id')->on('showrooms');
+            $table->integer('movie_id')->unsigned();
+            $table->foreign('movie_id')->references('id')->on('movies')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        //Bookings table to store the user bookings
+        Schema::create('bookings', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('email');
+            $table->integer('ticket_id')->unsigned();
+            $table->foreign('ticket_id')->references('id')->on('tickets');
+            $table->integer('seating_id')->unsigned();
+            $table->foreign('seating_id')->references('id')->on('seating');
+            $table->decimal('total_amount', 13, 2);
+            $table->timestamps();
+        });
+
+        //Pivot table to store booked seats
+        Schema::create('booked_seating', function($table) {
+            $table->integer('booking_id')->unsigned();
+            $table->integer('seating_id')->unsigned();
+            $table->foreign('booking_id')->references('id')->on('bookings');
+            $table->foreign('seating_id')->references('id')->on('seating');
+        });
     }
 
     /**
